@@ -1,8 +1,24 @@
 # Sample Defect Report — Connected Banking
 
 > Template + worked examples using dummy data. Reflects defect themes commonly found in
-> Connected Banking regression: whitelisting state inconsistency, fee wallet edge cases, and
-> commercial slab boundary errors.
+> Connected Banking regression.
+
+## Defect Theme Taxonomy
+
+Recurring defect themes tracked for this module:
+
+- Whitelisting state inconsistency
+- Fee wallet edge cases
+- Commercial slab boundary errors
+- Cross-account data leakage (multi-account isolation)
+- Report/reconciliation drift (platform vs. bank, or report vs. report)
+- Consent management timing issues
+- API validation defects
+- Dashboard issues
+- Export/download issues
+- Search/filter issues
+
+**Severity categories used:** Minor, Major, Critical, Blocker.
 
 ---
 
@@ -71,6 +87,77 @@ data-integrity issue for financial reporting.
 **Suggested Fix**
 Correct the slab boundary comparison operator and add explicit boundary-value unit tests for
 every slab transition.
+
+---
+
+## Defect #3
+
+| Field | Value |
+|---|---|
+| **ID** | BUG-CB-2073 (sample) |
+| **Title** | Mini Statement total doesn't match the full Transactions view for the same date range |
+| **Severity** | Major |
+| **Module** | Connected Banking → Mini Statement / Transactions |
+| **Environment** | UAT (dummy data) |
+
+**Steps to Reproduce**
+1. Generate a Mini Statement for a dummy account, date range = last 7 days
+2. Independently sum the same 7 days in the full Transactions view
+
+**Expected Result**
+Both totals should be identical — the Mini Statement is meant to be a shorter *view* of the same
+underlying data, not a separately-computed one.
+
+**Actual Result**
+Mini Statement total is ₹340 lower. Investigation shows the Mini Statement service excludes
+transactions still in a `PENDING` bank-confirmation state, while the full Transactions view
+includes them — an undocumented behavioral difference between the two code paths.
+
+**Impact**
+A business reconciling their own books against the Mini Statement (a common use case, since it's
+the "quick view") would see a number that doesn't match the platform's own full transaction data
+— confusing and erodes trust in either view being authoritative.
+
+**Suggested Fix**
+Either make both views apply the same inclusion rule for pending transactions, or clearly label
+the Mini Statement's totals as "confirmed only" so the difference is intentional and visible,
+not a silent discrepancy.
+
+---
+
+## Defect #4
+
+| Field | Value |
+|---|---|
+| **ID** | BUG-CB-2089 (sample) |
+| **Title** | Revoked consent still allows transaction data access for ~90 seconds |
+| **Severity** | Critical |
+| **Module** | Connected Banking → Consent Management |
+| **Environment** | UAT (dummy data) |
+
+**Steps to Reproduce**
+1. With consent ACTIVE for a dummy account, note that transaction queries succeed
+2. Revoke consent for that account
+3. Immediately (within 1–2 minutes) query transactions again
+
+**Expected Result**
+Access should be denied immediately upon revocation — consent is a security boundary, not a
+soft preference.
+
+**Actual Result**
+Transaction queries continue to succeed for approximately 90 seconds after revocation, because
+the Consent Management Service's revocation event is only picked up by a background cache
+refresh cycle rather than invalidating access synchronously.
+
+**Impact**
+A real unauthorized-access window — data continues to be accessible after the business
+explicitly withdrew permission for it. This is a compliance-relevant defect, not just a
+functional one.
+
+**Suggested Fix**
+Consent revocation should synchronously invalidate any cached consent-check state (or the
+access-check should query consent status directly rather than trusting a cache), closing the
+window to effectively zero.
 
 ---
 

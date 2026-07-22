@@ -48,12 +48,17 @@ match the main Transactions view exactly is a high-value regression case.
 | Onboarding & whitelisting | [`test-cases/regression-checklist.md`](../test-cases/regression-checklist.md) TC-001–010 |
 | Fee wallet | TC-015–018 |
 | Commercial slabs | TC-019–021 |
-| Bank Account linking, Balance, Transactions, Mini Statement | Candidate for expansion — see below |
+| Multi-account linking | TC-022–025, derived from [`business-flow.md`](./business-flow.md) |
+| Credits/Debits filter isolation | TC-026–027 |
+| Mini Statement vs. Transactions reconciliation | TC-028 |
+| Cross-report consistency & export format | TC-029–031 |
+| Consent management (security-critical) | TC-032–034 |
 
 ## Future Test Coverage (Not Yet in `test-cases/`)
 
-- Multi-account linking — does adding a second bank account to the same business affect the
-  first account's whitelisting state or balance display?
-- Credits vs. Debits filter isolation
-- Mini Statement vs. full Transactions view reconciliation (totals must match exactly)
-- Download/export format validation (CSV/PDF) for Banking and Transaction Reports
+- Automating the newly-documented manual test cases (TC-022–034) — consent revocation immediacy
+  (TC-033) and Mini Statement reconciliation (TC-028) are the next priority tier given their
+  security and financial-reporting impact
+- Multi-account linking and consent revocation under concurrent load — the real load test
+  (see `test-reports/load-testing-report.md`) validated the core transaction path only, not
+  these adjacent flows (see `business-flow.md` section 6 for the full gap analysis)

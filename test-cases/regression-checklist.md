@@ -48,21 +48,58 @@
 | TC-020 | Slab boundary — ₹1,001 | 1. Initiate a transaction of ₹1,001 | Slab B fee applied (not Slab A) |
 | TC-021 | Slab boundary — ₹25,000 vs ₹25,001 | 1. Test both values | Correct slab fee applied at each side of the boundary |
 
-## 6. Full Regression Checklist
+## 6. Multi-Account Linking
+
+> Closes gaps flagged in [`docs/feature-modules.md`](../docs/feature-modules.md) — derived from
+> [`docs/business-flow.md`](../docs/business-flow.md).
+
+| ID | Scenario | Steps | Expected Result |
+|---|---|---|---|
+| TC-022 | Link a second bank account | 1. With Account A already ACTIVE, link a dummy Account B | Account B enters its own independent WHITELIST_PENDING cycle |
+| TC-023 | Second account linking doesn't affect the first | 1. During Account B's verification, check Account A | Account A's status, balance, and transaction history remain completely unchanged |
+| TC-024 | Dashboard aggregates both accounts correctly | 1. Once both accounts are ACTIVE, view the dashboard | Combined/account-scoped views (per product design) correctly reflect both accounts, no data merged incorrectly |
+| TC-025 | Transaction search scoped to the correct account | 1. Search transactions while Account B is selected | Only Account B's transactions appear — never mixed with Account A's |
+
+## 7. Transaction & Reporting Reconciliation
+
+| ID | Scenario | Steps | Expected Result |
+|---|---|---|---|
+| TC-026 | Credits filter excludes debits | 1. Apply a Credits-only filter on a mixed dummy transaction set | Zero debit entries appear in the filtered results |
+| TC-027 | Debits filter excludes credits | 1. Apply a Debits-only filter | Zero credit entries appear |
+| TC-028 | Mini Statement matches full Transactions view | 1. Generate a Mini Statement for a date range 2. Compare totals to the full Transactions view for the same range | Totals match exactly — no drift between the two code paths |
+| TC-029 | Cross-report consistency | 1. Generate Account Report, Banking Report, and Transaction Report for the same date range | All three report the same underlying totals — any mismatch is reportable even before knowing which report is wrong |
+| TC-030 | Export format validation — CSV | 1. Download a Transaction Report as CSV | File opens correctly, totals match on-screen data |
+| TC-031 | Export format validation — PDF | 1. Download the same report as PDF | Renders correctly, totals match the CSV export |
+
+## 8. Consent Management (Security-Critical)
+
+| ID | Scenario | Steps | Expected Result |
+|---|---|---|---|
+| TC-032 | Consent active — data accessible | 1. With consent ACTIVE, query transactions/balance | Data returned normally |
+| TC-033 | Consent revoked — access cut off immediately | 1. Revoke consent for a dummy account 2. Immediately attempt to query transactions/balance | Access is denied **immediately** — not after a cache expiry or next scheduled sync |
+| TC-034 | Revoked consent blocks new transactions | 1. With consent revoked, attempt to initiate a transaction | Blocked with a clear consent-required error |
+
+## 9. Full Regression Checklist
 
 - [ ] Signup & eKYC
 - [ ] Add Bank Account (valid/invalid data)
 - [ ] Bank Whitelisting status propagation
 - [ ] Balance Verification
+- [ ] Multi-Account Linking (independent lifecycle, dashboard aggregation, search scoping)
 - [ ] Transaction Initiation
 - [ ] Transaction Status Polling
+- [ ] Credits/Debits Filter Isolation
+- [ ] Mini Statement vs. Transactions Reconciliation
+- [ ] Cross-Report Consistency (Account / Banking / Transaction Reports)
+- [ ] Export Format Validation (CSV / PDF)
+- [ ] Consent Management (grant / revoke / immediate access cutoff)
 - [ ] Fee Wallet Deduction
 - [ ] Insufficient Wallet Balance Handling
 - [ ] Commercial Slab Boundaries
 - [ ] Transaction Limits (daily cap, TPS, count)
 - [ ] Dashboard — Balance & Transaction Reporting
 
-## 7. Priority Automation Candidates
+## 10. Priority Automation Candidates
 
 1. Signup & eKYC completion
 2. Add bank account (valid / invalid)
@@ -70,5 +107,9 @@
 4. Balance verification post-whitelisting
 5. Transaction initiation and status polling
 6. Fee wallet deduction / insufficient-balance blocking
+
+Consent revocation immediacy (TC-033) and Mini Statement reconciliation (TC-028) are the next
+priority tier for automation, given their security and financial-reporting impact — currently
+documented as manual test cases only.
 
 See [`automation/`](../automation) for the Playwright implementation.

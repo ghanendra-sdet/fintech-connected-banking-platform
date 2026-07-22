@@ -117,6 +117,11 @@ fee model.
 
 ## 🔄 How It Works — Onboarding & Fee Model
 
+> This section covers onboarding and the fee model at a high level. For the full **end-to-end
+> business flow** — multi-account linking, the transaction/reporting data path, consent
+> management, and how the real load test below maps onto these flows — see
+> [`docs/business-flow.md`](./docs/business-flow.md).
+
 ### Onboarding Flow
 
 ```
@@ -187,8 +192,12 @@ succeeding on the bank side but failing fee deduction, or vice versa).
 
 ## 🏆 Key Achievements
 
-- Validated a 57-service distributed architecture as part of the broader Connected Banking
-  system, handling **1.6M+ daily transactions**
+- Owned QA coverage across Connected Banking's own **~29-service architecture** — spanning the
+  Bank Account lifecycle (Linking, Verification, Overview, Balance), Transaction/Mini
+  Statement/Reporting services, and Consent Management (see
+  [Service Architecture](./docs/service-architecture.md) for the full breakdown)
+- Validated a 57-service distributed architecture as part of the broader platform under load,
+  handling **1.6M+ daily transactions**
 - Confirmed stable throughput of **~78.5–80.2 TPS**, with peak validation up to ~100 TPS, across
   **405,000+ transactions** in a single sustained load test (full report below)
 - Designed and executed automation covering the full onboarding-to-transaction journey using
@@ -280,8 +289,10 @@ fintech-connected-banking-platform/
 ├── docs/
 │   ├── business-overview.md      → What Connected Banking is, glossary, differentiation
 │   ├── architecture-and-flow.md  → Onboarding, whitelisting, and fee wallet flow diagrams
+│   ├── business-flow.md          → Multi-account linking, transaction/reporting flow, consent, load-test mapping
 │   ├── feature-modules.md        → Full feature/screen inventory (Bank Accounts, Transactions, Mini Statement, Reports)
-│   └── service-architecture.md   → Microservice-level decomposition & integration test boundaries
+│   ├── service-architecture.md   → Microservice-level decomposition & integration test boundaries
+│   └── shared-platform-services.md → Company-wide services this product depends on (Auth, Commercial/GST/Reconciliation Engines, etc.)
 ├── test-cases/
 │   └── regression-checklist.md   → Full regression suite + edge cases
 ├── automation/
