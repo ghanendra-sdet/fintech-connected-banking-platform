@@ -279,7 +279,9 @@ fintech-connected-banking-platform/
 ├── README.md
 ├── docs/
 │   ├── business-overview.md      → What Connected Banking is, glossary, differentiation
-│   └── architecture-and-flow.md  → Onboarding, whitelisting, and fee wallet flow diagrams
+│   ├── architecture-and-flow.md  → Onboarding, whitelisting, and fee wallet flow diagrams
+│   ├── feature-modules.md        → Full feature/screen inventory (Bank Accounts, Transactions, Mini Statement, Reports)
+│   └── service-architecture.md   → Microservice-level decomposition & integration test boundaries
 ├── test-cases/
 │   └── regression-checklist.md   → Full regression suite + edge cases
 ├── automation/
