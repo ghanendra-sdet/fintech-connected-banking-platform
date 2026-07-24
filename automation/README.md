@@ -3,6 +3,10 @@
 Automation for the Connected Banking onboarding-to-transaction journey, built with
 **Playwright + TypeScript** using the **Page Object Model (POM)**.
 
+> Automated scenarios trace to [`../regression-checklist.md`](../regression-checklist.md) and the
+> real activation flow in [`../docs/user-guide-activate-connected-banking.md`](../docs/user-guide-activate-connected-banking.md).
+> See [`../docs/README.md`](../docs/README.md) for the full documentation map.
+
 ## Why Playwright + TypeScript
 
 - Native auto-waiting handles the async, state-machine-like nature of bank whitelisting well —
@@ -48,3 +52,7 @@ All automation uses **dummy data only**:
 4. Balance verification post-whitelisting
 5. Transaction initiation and status polling
 6. Fee wallet deduction and insufficient-balance blocking
+
+Admin activation, the Connect Flow's account-match validation, and consent revocation immediacy
+(see [`../docs/feature-modules.md`](../docs/feature-modules.md) Future Test Coverage) are the
+next priority tier — currently manual-only.

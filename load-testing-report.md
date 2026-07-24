@@ -13,6 +13,11 @@
 > colleagues, and internal identifiers have been removed or replaced with generic role titles.
 > Performance figures reflect the actual test execution and are retained as they demonstrate
 > testing methodology and analysis quality, not confidential business data.
+>
+> See [`docs/business-flow.md`](./docs/business-flow.md) section 6 for how these results map
+> (and don't map) onto the product's other flows, and
+> [`docs/service-architecture.md`](./docs/service-architecture.md) for which services sit on
+> this load path. See [`docs/README.md`](./docs/README.md) for the full documentation map.
 
 ---
 

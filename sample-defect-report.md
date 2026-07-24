@@ -1,7 +1,10 @@
 # Sample Defect Report — Connected Banking
 
 > Template + worked examples using dummy data. Reflects defect themes commonly found in
-> Connected Banking regression.
+> Connected Banking regression. Several defects below map to flows in
+> [`docs/business-flow.md`](./docs/business-flow.md) and the real activation SOP in
+> [`docs/user-guide-activate-connected-banking.md`](./docs/user-guide-activate-connected-banking.md)
+> — see [`docs/README.md`](./docs/README.md) for the full documentation map.
 
 ## Defect Theme Taxonomy
 
@@ -158,6 +161,43 @@ functional one.
 Consent revocation should synchronously invalidate any cached consent-check state (or the
 access-check should query consent status directly rather than trusting a cache), closing the
 window to effectively zero.
+
+---
+
+## Defect #5
+
+| Field | Value |
+|---|---|
+| **ID** | BUG-CB-2104 (sample) |
+| **Title** | Pending wallet recharge (non-whitelisted account) is visually identical to a failed recharge |
+| **Severity** | Major |
+| **Module** | Connected Banking → Wallet / Ledger Recharge |
+| **Environment** | UAT (dummy data) |
+
+**Steps to Reproduce**
+1. Recharge the Ledger from a dummy non-whitelisted bank account
+2. Observe the transaction status in the Recent Transactions list
+
+**Expected Result**
+A recharge awaiting Admin approval should show a clearly distinct **Pending** status — visually
+and textually different from a failed transaction (per the real activation flow's Pending →
+Admin Approve/Cancel design).
+
+**Actual Result**
+The recharge shows a red "Failed" badge identical in styling to genuinely failed transactions.
+The item is, in fact, sitting in the Admin's Pending approval queue and will succeed once
+approved — but nothing in the merchant-facing UI indicates that.
+
+**Impact**
+Merchants seeing a "Failed" badge reasonably conclude the recharge didn't work and may retry
+it, attempt to recharge again, or contact support unnecessarily — all while the original
+recharge is still pending and could later succeed, risking a double-recharge if the merchant
+retries and both eventually get approved.
+
+**Suggested Fix**
+Give Pending recharges awaiting Admin approval their own distinct status badge/color (e.g.
+amber, "Pending Approval") — never overlapping visually or textually with a genuinely failed
+transaction.
 
 ---
 

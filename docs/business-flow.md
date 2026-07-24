@@ -4,7 +4,7 @@
 > onboarding/whitelisting state machine, this document covers the **actual end-to-end business
 > flow** — what a business experiences linking and using a bank account, including multi-account
 > behavior, consent, and how the real load test (see
-> [`test-reports/load-testing-report.md`](../test-reports/load-testing-report.md)) maps onto
+> [`test-reports/load-testing-report.md`](../load-testing-report.md)) maps onto
 > these flows.
 
 ## Actors
@@ -181,7 +181,7 @@ being reconciled against what the bank actually confirmed.
 
 ## 6. How the Real Load Test Maps Onto These Flows
 
-The [load testing executive report](../test-reports/load-testing-report.md) — 405,067
+The [load testing executive report](../load-testing-report.md) — 405,067
 transactions, ~80.2 TPS stable, 0.001% error rate — validated specifically the **Transaction
 Service path** in section 1 above: initiation → validation → ledger posting → bank adapter
 invocation → status polling → final response handling (see the report's Test Scope).
@@ -209,4 +209,4 @@ account correctly connected?"* — this document answers *"once connected, does 
 can happen to the data and the money stay correct, consistent, and secure?"* The highest-value
 defects here live in cross-source drift (platform vs. bank), cross-account isolation, and
 consent timing — exactly the scenarios captured as edge cases in
-[`test-cases/regression-checklist.md`](../test-cases/regression-checklist.md).
+[`test-cases/regression-checklist.md`](../regression-checklist.md).

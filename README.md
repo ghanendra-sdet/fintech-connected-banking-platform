@@ -10,6 +10,10 @@
 > All content here uses **generic/sample data only**. No client names, company names, banking
 > partner names, or confidential/production information are included. Numbers used to illustrate
 > commercial structure and test design are representative examples, not live production pricing.
+>
+> 📍 **New here?** [`docs/README.md`](./docs/README.md) is a documentation map answering "what is
+> this, how does it work, who's involved, what does it depend on" — with a recommended reading
+> order through every doc in this repo, including the real activation SOP.
 
 ---
 
@@ -26,6 +30,11 @@
 9. [Regression Checklist](#-regression-checklist)
 10. [Screenshots & Reports](#-screenshots--reports)
 11. [Repository Structure](#-repository-structure)
+
+> Deeper dives not covered inline in this README: [Stakeholders & Dependencies](./docs/business-overview.md),
+> [Service Architecture](./docs/service-architecture.md), [Shared Platform Services](./docs/shared-platform-services.md),
+> [UI Consistency](./docs/ui-consistency.md), [Real Activation User Guide](./docs/user-guide-activate-connected-banking.md)
+> — see [`docs/README.md`](./docs/README.md) for the full map.
 
 ---
 
@@ -120,7 +129,11 @@ fee model.
 > This section covers onboarding and the fee model at a high level. For the full **end-to-end
 > business flow** — multi-account linking, the transaction/reporting data path, consent
 > management, and how the real load test below maps onto these flows — see
-> [`docs/business-flow.md`](./docs/business-flow.md).
+> [`docs/business-flow.md`](./docs/business-flow.md). For the **real, detailed Admin activation
+> and merchant Connect Flow** (the actual SOP, screen-by-screen) — see
+> [`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md) for the technical version or
+> [`docs/user-guide-activate-connected-banking.md`](./docs/user-guide-activate-connected-banking.md)
+> for the non-technical, merchant-facing walkthrough.
 
 ### Onboarding Flow
 
@@ -233,7 +246,7 @@ infrastructure baseline.
 infrastructure-level recommendation (Redis queue memory sizing).
 
 Full report, methodology, infrastructure configuration, and ledger/balance calculation
-validation available in [`test-reports/load-testing-report.md`](./test-reports/load-testing-report.md).
+validation available in [`load-testing-report.md`](./load-testing-report.md).
 
 ---
 
@@ -269,45 +282,56 @@ data.
 - [ ] Commercial Slab Boundaries
 - [ ] Transaction Limits (daily cap, TPS, count)
 - [ ] Dashboard — Balance & Transaction Reporting
+- [ ] UI Consistency (widget labeling, status badges, formatting, terminology, accessibility)
 
-Full checklist with edge cases available in [`test-cases/`](./test-cases).
+Full checklist with edge cases available in [`regression-checklist.md`](./regression-checklist.md).
 
 ---
 
 ## 📸 Screenshots & Reports
 
 Sample test execution reports, defect report templates, and the full performance test report are
-available under [`test-reports/`](./test-reports) and [`bug-reports/`](./bug-reports).
+available in [`load-testing-report.md`](./load-testing-report.md) and
+[`sample-defect-report.md`](./sample-defect-report.md).
 
 ---
 
 ## 📁 Repository Structure
 
+> **New here?** Start with [`docs/README.md`](./docs/README.md) — a documentation map that
+> answers "what is this, how does it work, who's involved, what does it depend on" and points to
+> exactly the right doc for each question, in recommended reading order.
+
 ```
 fintech-connected-banking-platform/
 ├── README.md
+├── regression-checklist.md       → Full regression suite + edge cases (65 test cases)
+├── sample-defect-report.md       → Defect theme taxonomy + worked defect examples
+├── load-testing-report.md        → Full load testing executive report (real data)
 ├── docs/
-│   ├── business-overview.md      → What Connected Banking is, glossary, differentiation
-│   ├── architecture-and-flow.md  → Onboarding, whitelisting, and fee wallet flow diagrams
+│   ├── README.md                 → 📍 Documentation map — start here
+│   ├── business-overview.md      → What Connected Banking is, stakeholders, dependencies, glossary
+│   ├── architecture-and-flow.md  → Real, detailed Admin activation + merchant Connect Flow, whitelisting, fee wallet
 │   ├── business-flow.md          → Multi-account linking, transaction/reporting flow, consent, load-test mapping
+│   ├── user-guide-activate-connected-banking.md → Non-technical, merchant-facing activation SOP (real)
 │   ├── feature-modules.md        → Full feature/screen inventory (Bank Accounts, Transactions, Mini Statement, Reports)
 │   ├── service-architecture.md   → Microservice-level decomposition & integration test boundaries
-│   └── shared-platform-services.md → Company-wide services this product depends on (Auth, Commercial/GST/Reconciliation Engines, etc.)
-├── test-cases/
-│   └── regression-checklist.md   → Full regression suite + edge cases
-├── automation/
-│   ├── README.md                 → Framework setup & structure
-│   └── sample-onboarding.spec.ts → Sample Playwright + TypeScript test (dummy data)
-├── bug-reports/
-│   └── sample-defect-report.md   → Defect report template with dummy example
-└── test-reports/
-    └── load-testing-report.md    → Full load testing executive report
+│   ├── shared-platform-services.md → Company-wide services this product depends on (Auth, Commercial/GST/Reconciliation Engines, etc.)
+│   └── ui-consistency.md         → Cross-screen UI/UX consistency (Bank Widget vs. Ledger Widget, status badges, a11y)
+└── automation/
+    ├── README.md                 → Framework setup & structure
+    └── sample-onboarding.spec.ts → Sample Playwright + TypeScript test (dummy data)
 ```
+
+> **Note on structure:** `bug-reports/`, `test-cases/`, and `test-reports/` were originally
+> separate folders, each holding a single file — flattened to the repo root since a folder
+> holding exactly one file adds navigation overhead without organizing anything. `docs/` and
+> `automation/` remain folders because each genuinely groups multiple related files.
 
 ## 🤖 Support & Dispute Resolution
 
 Connected Banking issues (whitelisting confusion, disputes, account detail changes) are handled
 by the shared [AI Dispute Resolution Engine](https://github.com/ghanendra-sdet/ai-dispute-resolution-engine)
 — a single AI-powered support layer common across Collection, Payout, Connected Banking, BBPS,
-and YOBO. It resolves ~80% of issues without human involvement, cutting average ticket resolution
+Reseller, and YOBO. It resolves ~80% of issues without human involvement, cutting average ticket resolution
 time from a 24–72 hour baseline to under 6 hours.

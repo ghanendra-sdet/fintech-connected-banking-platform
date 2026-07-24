@@ -92,5 +92,5 @@ When scoping regression for a change to any shared service, ask: *which other pr
 depend on this service?* The Reconciliation Engine and Commercial/GST Engine are the two shared
 dependencies most worth flagging for Connected Banking specifically — a regression in either
 could produce exactly the kind of "platform vs. bank drift" or fee-miscalculation defects
-documented in [`bug-reports/`](../bug-reports), without any code in Connected Banking itself
+documented in [`bug-reports/`](../sample-defect-report.md), without any code in Connected Banking itself
 having changed.

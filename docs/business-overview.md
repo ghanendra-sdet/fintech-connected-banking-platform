@@ -2,7 +2,8 @@
 
 > **Start here if you're new to fintech QA, in HR, or from a non-QA technical role.** This
 > document explains what a Connected Banking product does and why it matters, before you look at
-> any test case or code.
+> any test case or code. See [`README.md`](./README.md) for the full documentation map if you
+> landed here directly.
 
 ## 1. What problem does it solve?
 
@@ -85,4 +86,40 @@ transition, not just a linear happy path.
   processing), enterprises integrating ERPs with banking via API, and large-transaction-volume
   platforms such as crypto exchanges or other high-throughput fintech businesses.
 
-See [`architecture-and-flow.md`](./architecture-and-flow.md) for the detailed flow diagrams.
+## 7. Involved Parties (Stakeholders)
+
+| Stakeholder | Why They Care |
+|---|---|
+| **Business / Merchant** | Needs reliable multi-bank visibility and transaction execution |
+| **Merchant Admins** | Configure linked accounts, monitor whitelisting status |
+| **Banks** | The source of truth for balance/transactions; the whitelisting gatekeeper |
+| **Finance Team** | Owns fee wallet accuracy and reconciliation correctness |
+| **Treasury Team** | Cares about accurate real-time balance visibility across accounts |
+| **Operations Team** | Monitors onboarding health, Pending-recharge approvals |
+| **Compliance Team** | Cares about consent management and audit trail completeness |
+
+## 8. Dependencies
+
+**This product's own internal services** — see [`service-architecture.md`](./service-architecture.md)
+for the full ~29-service breakdown (Bank Account lifecycle, Transactions, Reporting, Consent).
+
+**Shared, company-wide platform services** — see [`shared-platform-services.md`](./shared-platform-services.md)
+for the engines this product consumes rather than reimplements: Authentication, Merchant
+Onboarding, Commercial/GST/Reconciliation Engines, Audit Logs.
+
+**External, third-party dependencies:**
+
+- **Banking APIs** / **Account Aggregator APIs** — the actual bank-side data source
+- **Banking Networks** — IMPS/NEFT/RTGS rails for transaction execution
+- **OTP Services** — identity verification during onboarding
+- **Notification Services** — whitelisting status and transaction alerts
+
+## 9. Cross-Module Dependencies (Conceptual, Within the Platform)
+
+- **AI Dispute Resolution Engine** — handles merchant support issues raised about whitelisting
+  confusion, disputes, and account detail changes, as part of the shared cross-product support
+  layer
+
+See [`architecture-and-flow.md`](./architecture-and-flow.md) for the detailed flow diagrams, and
+[`ui-consistency.md`](./ui-consistency.md) for how this data must render consistently across
+every screen — especially the Bank Widget vs. Ledger Widget distinction.
