@@ -5,7 +5,10 @@ Automation for the Connected Banking onboarding-to-transaction journey, built wi
 
 > Automated scenarios trace to [`../regression-checklist.md`](../regression-checklist.md) and the
 > real activation flow in [`../docs/user-guide-activate-connected-banking.md`](../docs/user-guide-activate-connected-banking.md).
-> See [`../docs/README.md`](../docs/README.md) for the full documentation map.
+> See [`../docs/README.md`](../docs/README.md) for the full documentation map,
+> [`../docs/tech-and-skills.md`](../docs/tech-and-skills.md) for the tech-stack rationale and the
+> real executed load-test results, and [`../sample-rtm.md`](../sample-rtm.md) for which of these
+> scenarios actually trace back to a requirement.
 
 ## Why Playwright + TypeScript
 
@@ -29,6 +32,8 @@ automation/
 │   └── TransactionPage.ts
 ├── fixtures/
 │   └── dummy-business.ts
+├── api-tests/
+│   └── whitelisting-status-enforcement.spec.ts   ← API-layer only, no UI — see Defect #1
 └── tests/
     ├── sample-onboarding.spec.ts
     └── ...
