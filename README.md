@@ -33,7 +33,8 @@
 
 > Deeper dives not covered inline in this README: [Stakeholders & Dependencies](./docs/business-overview.md),
 > [Service Architecture](./docs/service-architecture.md), [Shared Platform Services](./docs/shared-platform-services.md),
-> [UI Consistency](./docs/ui-consistency.md), [Real Activation User Guide](./docs/user-guide-activate-connected-banking.md)
+> [UI Consistency](./docs/ui-consistency.md), [Real Activation User Guide](./docs/user-guide-activate-connected-banking.md),
+> [Tech Stack & Skills Index](./docs/tech-and-skills.md), [Sample RTM](./sample-rtm.md)
 > — see [`docs/README.md`](./docs/README.md) for the full map.
 
 ---
@@ -102,10 +103,13 @@ fee model.
 |---|---|
 | **UI Automation** | Playwright, TypeScript |
 | **API Testing** | Playwright API requests, Postman |
-| **Performance Testing** | JMeter, Grafana (monitoring) |
+| **Performance Testing** | JMeter, Grafana (monitoring) — real executed run, see [Performance & Load Testing](#-performance--load-testing) |
 | **CI/CD** | Jenkins |
-| **Bug Tracking** | JIRA |
+| **Bug Tracking & Traceability** | JIRA, RTM (see [`sample-rtm.md`](./sample-rtm.md)) |
 | **Version Control** | Git, GitHub |
+
+> Full breakdown of why each tool was chosen, plus a skill → proof index, in
+> [`docs/tech-and-skills.md`](./docs/tech-and-skills.md).
 
 ---
 
@@ -137,24 +141,13 @@ fee model.
 
 ### Onboarding Flow
 
-```
-Website Signup
-      │
-      ▼
-Self-Service eKYC (auto-approved)
-      │
-      ▼
-Add Bank Account (account number, IFSC, company name)
-      │
-      ▼
-Bank Whitelisting  ◀── Manual step: business asks their bank to
-      │                whitelist the platform as a Digital Service
-      │                Provider (DSP) and enable its IP
-      ▼
-Balance Verification (instant, once whitelisted)
-      │
-      ▼
-Transactions via API / Dashboard
+```mermaid
+flowchart TD
+    A["Website Signup"] --> B["Self-Service eKYC<br/>(auto-approved)"]
+    B --> C["Add Bank Account<br/>(account number, IFSC, company name)"]
+    C --> D{"Bank Whitelisting<br/>◀ Manual step"}
+    D -->|"Business asks bank to whitelist<br/>platform as a DSP + enable IP"| E["Balance Verification<br/>(instant, once whitelisted)"]
+    E --> F["Transactions via API / Dashboard"]
 ```
 
 This is the **one manual step** in an otherwise fully self-service flow — without bank
@@ -162,20 +155,14 @@ whitelisting, no transaction can process, regardless of how complete the onboard
 
 ### Fee Wallet Model
 
-```
-Customer's Bank Account (their own funds — never touched for fees)
-      │
-      │  transaction amount flows normally between customer and counterparty
-      ▼
-Transaction Processed
-      │
-      │  platform service fee (e.g. flat fee + GST) is deducted separately
-      ▼
-Dedicated Fee Wallet (pre-funded, platform-managed)
-      │
-      │  wallet balance cannot be withdrawn — used only for service fees
-      ▼
-Insufficient Wallet Balance ──▶ Transaction Blocked
+```mermaid
+flowchart TD
+    A["Customer's Bank Account<br/>(their own funds — never touched for fees)"] --> B["Transaction Processed"]
+    B -->|"transaction amount flows normally<br/>between customer and counterparty"| B
+    B -->|"platform service fee (flat fee + GST)<br/>deducted separately"| C["Dedicated Fee Wallet<br/>(pre-funded, platform-managed)"]
+    C -->|"balance cannot be withdrawn —<br/>used only for service fees"| D{"Sufficient Balance?"}
+    D -->|No| E["Transaction Blocked"]
+    D -->|Yes| F["Fee Deducted, Transaction Proceeds"]
 ```
 
 **Key rule for testing:** the wallet must be preloaded with enough balance to cover the fee
@@ -292,7 +279,8 @@ Full checklist with edge cases available in [`regression-checklist.md`](./regres
 
 Sample test execution reports, defect report templates, and the full performance test report are
 available in [`load-testing-report.md`](./load-testing-report.md) and
-[`sample-defect-report.md`](./sample-defect-report.md).
+[`sample-defect-report.md`](./sample-defect-report.md). For requirement-level traceability
+(including two deliberate coverage gaps), see [`sample-rtm.md`](./sample-rtm.md).
 
 ---
 
@@ -307,6 +295,7 @@ fintech-connected-banking-platform/
 ├── README.md
 ├── regression-checklist.md       → Full regression suite + edge cases (65 test cases)
 ├── sample-defect-report.md       → Defect theme taxonomy + worked defect examples
+├── sample-rtm.md                 → Requirement traceability matrix (with 2 deliberate gaps)
 ├── load-testing-report.md        → Full load testing executive report (real data)
 ├── docs/
 │   ├── README.md                 → 📍 Documentation map — start here
@@ -317,7 +306,8 @@ fintech-connected-banking-platform/
 │   ├── feature-modules.md        → Full feature/screen inventory (Bank Accounts, Transactions, Mini Statement, Reports)
 │   ├── service-architecture.md   → Microservice-level decomposition & integration test boundaries
 │   ├── shared-platform-services.md → Company-wide services this product depends on (Auth, Commercial/GST/Reconciliation Engines, etc.)
-│   └── ui-consistency.md         → Cross-screen UI/UX consistency (Bank Widget vs. Ledger Widget, status badges, a11y)
+│   ├── ui-consistency.md         → Cross-screen UI/UX consistency (Bank Widget vs. Ledger Widget, status badges, a11y)
+│   └── tech-and-skills.md        → Skill-oriented index: tech stack, skill → proof mapping, performance deep-dive
 └── automation/
     ├── README.md                 → Framework setup & structure
     └── sample-onboarding.spec.ts → Sample Playwright + TypeScript test (dummy data)
