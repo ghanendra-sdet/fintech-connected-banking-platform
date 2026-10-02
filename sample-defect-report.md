@@ -2,7 +2,8 @@
 
 > Template + worked examples using dummy data. Reflects defect themes commonly found in
 > Connected Banking regression. Several defects below map to flows in
-> [`docs/business-flow.md`](./docs/business-flow.md) and the real activation SOP in
+> [`docs/business-flow.md`](./docs/business-flow.md), exact mechanism diagrams in
+> [`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md), and the real activation SOP in
 > [`docs/user-guide-activate-connected-banking.md`](./docs/user-guide-activate-connected-banking.md)
 > — see [`docs/README.md`](./docs/README.md) for the full documentation map.
 
@@ -47,6 +48,8 @@ should enforce the same state check as the UI.
 **Actual Result**
 The API accepts the transaction request and it proceeds to a bank adapter call, which then fails
 downstream with an unrelated generic error, rather than being blocked upfront with a clear reason.
+See [`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md)'s Defect #1 mechanism
+diagram for exactly where the UI-only check diverges from the API path.
 
 **Impact**
 Confusing failure mode for API-integrating businesses (the primary user of this product) — they
@@ -150,7 +153,11 @@ soft preference.
 **Actual Result**
 Transaction queries continue to succeed for approximately 90 seconds after revocation, because
 the Consent Management Service's revocation event is only picked up by a background cache
-refresh cycle rather than invalidating access synchronously.
+refresh cycle rather than invalidating access synchronously. See
+[`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md)'s Defect #4 mechanism diagram
+for the exact cache-refresh timing this window comes from — the same underlying pattern (a
+revocation that doesn't synchronously invalidate in-flight or cached access) also shows up in
+the YOBO repo's consent-fetch race.
 
 **Impact**
 A real unauthorized-access window — data continues to be accessible after the business
