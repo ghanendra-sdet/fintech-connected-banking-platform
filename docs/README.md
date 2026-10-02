@@ -19,6 +19,8 @@
 | **What's been automated?** | [`../automation/`](../automation) |
 | **What real defects has this surfaced?** | [`../sample-defect-report.md`](../sample-defect-report.md) |
 | **How does it perform under load?** | [`../load-testing-report.md`](../load-testing-report.md) — a real load testing executive report |
+| **What's the tech stack, and which skill maps to which proof?** | [`tech-and-skills.md`](./tech-and-skills.md) — a skill-oriented index, not a product-flow doc |
+| **Does every requirement actually have test coverage?** | [`../sample-rtm.md`](../sample-rtm.md) — including two deliberate coverage gaps |
 
 ## Reading Order (Recommended)
 
@@ -49,6 +51,10 @@
         ▼
 9. regression-checklist.md, automation/, sample-defect-report.md, load-testing-report.md
    ← the proof — coverage, automation, real findings, real performance numbers
+        │
+        ▼
+10. tech-and-skills.md, sample-rtm.md
+   ← the index — skill-to-proof mapping, requirement-to-test traceability (with real gaps)
 ```
 
 ## Business Flow vs. Tech Flow vs. User Flow — What's the Difference Here?
