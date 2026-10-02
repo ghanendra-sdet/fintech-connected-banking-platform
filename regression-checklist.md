@@ -15,6 +15,11 @@
 
 ## 2. Bank Whitelisting (State Machine)
 
+> TC-008 is the test case that should have caught `BUG-CB-2031` — see
+> [`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md)'s Defect #1 mechanism diagram
+> and [`sample-rtm.md`](./sample-rtm.md) REQ-1001 for why "attempt a transaction" needs to specify
+> the API layer explicitly, not just the UI, to actually close that gap.
+
 | ID | Scenario | Steps | Expected Result |
 |---|---|---|---|
 | TC-007 | Whitelisting pending state visible | 1. Add a bank account 2. View dashboard | Status clearly shows "Pending Whitelisting", not a generic/blank state |
@@ -72,6 +77,11 @@
 | TC-031 | Export format validation — PDF | 1. Download the same report as PDF | Renders correctly, totals match the CSV export |
 
 ## 8. Consent Management (Security-Critical)
+
+> TC-033's "immediately" is the exact phrasing `BUG-CB-2089` slipped through — see
+> [`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md)'s Defect #4 mechanism diagram
+> for the ~90-second cache-refresh window, and [`sample-rtm.md`](./sample-rtm.md) REQ-1004 for why
+> this test needs a defined polling interval, not a single immediate check, to actually bound it.
 
 | ID | Scenario | Steps | Expected Result |
 |---|---|---|---|
