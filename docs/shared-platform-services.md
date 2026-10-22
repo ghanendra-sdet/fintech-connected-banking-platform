@@ -6,13 +6,13 @@
 > from the ~29 services enumerated in [`service-architecture.md`](./service-architecture.md)
 > that belong to Connected Banking specifically.
 
-## Why "Shared Platform" Matters for Testing
+## A Shared-Service Defect Doesn't Stay Contained to One Product
 
-A defect in a shared service doesn't stay contained to one product. A bug in the company-wide
-**Reconciliation Engine**, for example, doesn't just affect Connected Banking's bank-vs-platform
-matching — it silently affects Collection's settlement reconciliation and Payout's ledger
-reconciliation too. This is why a change to a shared service should trigger **cross-product
-smoke testing**, not just regression scoped to whichever product initiated the change.
+A bug in the company-wide **Reconciliation Engine**, for example, doesn't just affect Connected
+Banking's bank-vs-platform matching — it silently affects Collection's settlement reconciliation
+and Payout's ledger reconciliation too. This is why a change to a shared service should trigger
+**cross-product smoke testing**, not just regression scoped to whichever product initiated the
+change.
 
 ## Shared Platform Services (Company-Wide)
 
