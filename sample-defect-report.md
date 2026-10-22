@@ -155,9 +155,7 @@ Transaction queries continue to succeed for approximately 90 seconds after revoc
 the Consent Management Service's revocation event is only picked up by a background cache
 refresh cycle rather than invalidating access synchronously. See
 [`docs/architecture-and-flow.md`](./docs/architecture-and-flow.md)'s Defect #4 mechanism diagram
-for the exact cache-refresh timing this window comes from — the same underlying pattern (a
-revocation that doesn't synchronously invalidate in-flight or cached access) also shows up in
-the YOBO repo's consent-fetch race.
+for the exact cache-refresh timing this window comes from.
 
 **Impact**
 A real unauthorized-access window — data continues to be accessible after the business
