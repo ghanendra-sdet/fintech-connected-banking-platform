@@ -30,6 +30,7 @@
 9. [Regression Checklist](#-regression-checklist)
 10. [Screenshots & Reports](#-screenshots--reports)
 11. [Repository Structure](#-repository-structure)
+12. [Support & Dispute Resolution](#-support--dispute-resolution)
 
 > Deeper dives not covered inline in this README: [Stakeholders & Dependencies](./docs/business-overview.md),
 > [Service Architecture](./docs/service-architecture.md), [Shared Platform Services](./docs/shared-platform-services.md),
@@ -143,11 +144,19 @@ fee model.
 
 ```mermaid
 flowchart TD
-    A["Website Signup"] --> B["Self-Service eKYC<br/>(auto-approved)"]
-    B --> C["Add Bank Account<br/>(account number, IFSC, company name)"]
-    C --> D{"Bank Whitelisting<br/>◀ Manual step"}
-    D -->|"Business asks bank to whitelist<br/>platform as a DSP + enable IP"| E["Balance Verification<br/>(instant, once whitelisted)"]
-    E --> F["Transactions via API / Dashboard"]
+    A["🧑 Website Signup"] --> B["✅ Self-Service eKYC<br/>(auto-approved)"]
+    B --> C["🏦 Add Bank Account<br/>(account number, IFSC, company name)"]
+    C --> D{"⚠️ Bank Whitelisting<br/>◀ Manual step"}
+    D -->|"Business asks bank to whitelist<br/>platform as a DSP + enable IP"| E["⚖️ Balance Verification<br/>(instant, once whitelisted)"]
+    E --> F["💳 Transactions via API / Dashboard"]
+
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef service fill:#004d40,color:#fff,stroke:#26a69a,stroke-width:1px
+
+    class A,B,C service
+    class D gate
+    class E,F good
 ```
 
 This is the **one manual step** in an otherwise fully self-service flow — without bank
@@ -157,12 +166,22 @@ whitelisting, no transaction can process, regardless of how complete the onboard
 
 ```mermaid
 flowchart TD
-    A["Customer's Bank Account<br/>(their own funds — never touched for fees)"] --> B["Transaction Processed"]
+    A["🏦 Customer's Bank Account<br/>(their own funds — never touched for fees)"] --> B["💳 Transaction Processed"]
     B -->|"transaction amount flows normally<br/>between customer and counterparty"| B
-    B -->|"platform service fee (flat fee + GST)<br/>deducted separately"| C["Dedicated Fee Wallet<br/>(pre-funded, platform-managed)"]
+    B -->|"platform service fee (flat fee + GST)<br/>deducted separately"| C["👛 Dedicated Fee Wallet<br/>(pre-funded, platform-managed)"]
     C -->|"balance cannot be withdrawn —<br/>used only for service fees"| D{"Sufficient Balance?"}
-    D -->|No| E["Transaction Blocked"]
-    D -->|Yes| F["Fee Deducted, Transaction Proceeds"]
+    D -->|No| E["❌ Transaction Blocked"]
+    D -->|Yes| F["✅ Fee Deducted, Transaction Proceeds"]
+
+    classDef service fill:#004d40,color:#fff,stroke:#26a69a,stroke-width:1px
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef bad fill:#b71c1c,color:#fff,stroke:#e53935,stroke-width:1px
+
+    class A,B,C service
+    class D gate
+    class F good
+    class E bad
 ```
 
 **Key rule for testing:** the wallet must be preloaded with enough balance to cover the fee
@@ -198,7 +217,7 @@ succeeding on the bank side but failing fee deduction, or vice versa).
   [Service Architecture](./docs/service-architecture.md) for the full breakdown)
 - Validated a 57-service distributed architecture as part of the broader platform under load,
   handling **1.6M+ daily transactions**
-- Confirmed stable throughput of **~78.5–80.2 TPS**, with peak validation up to ~100 TPS, across
+- Confirmed stable throughput of **~80.2 TPS**, with peak validation up to ~100 TPS, across
   **405,000+ transactions** in a single sustained load test (full report below)
 - Designed and executed automation covering the full onboarding-to-transaction journey using
   Playwright
@@ -321,7 +340,7 @@ fintech-connected-banking-platform/
 ## 🤖 Support & Dispute Resolution
 
 Connected Banking issues (whitelisting confusion, disputes, account detail changes) are handled
-by the shared [AI Dispute Resolution Engine](https://github.com/ghanendra-sdet/ai-dispute-resolution-engine)
+by the shared <a href="https://github.com/ghanendra-sdet/ai-dispute-resolution-engine" target="_blank" rel="noopener noreferrer">AI Dispute Resolution Engine</a>
 — a single AI-powered support layer common across Collection, Payout, Connected Banking, BBPS,
 Reseller, and YOBO. It resolves ~80% of issues without human involvement, cutting average ticket resolution
 time from a 24–72 hour baseline to under 6 hours.
