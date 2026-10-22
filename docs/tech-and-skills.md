@@ -37,11 +37,17 @@
 
 ```mermaid
 flowchart TD
-    UNIT["Unit Tests<br/>(owned by the application dev team — out of this QA scope)"]
-    API["API Tests<br/>whitelisting enforcement, commercial slabs, consent checks"]
-    UI["UI / E2E Tests<br/>Playwright — Signup -> eKYC -> Link -> Whitelist -> Transact"]
-    PERF["Performance Tests<br/>JMeter + Grafana — real 1hr26min soak, 405K+ transactions"]
+    UNIT["⬜ Unit Tests<br/>(owned by the application dev team — out of this QA scope)"]
+    API["🔌 API Tests<br/>whitelisting enforcement, commercial slabs, consent checks"]
+    UI["🖥️ UI / E2E Tests<br/>Playwright — Signup -> eKYC -> Link -> Whitelist -> Transact"]
+    PERF["📈 Performance Tests<br/>JMeter + Grafana — real 1hr26min soak, 405K+ transactions"]
     UNIT --> API --> UI --> PERF
+
+    classDef outOfScope fill:#37474f,color:#fff,stroke:#90a4ae,stroke-width:1px
+    classDef inScope fill:#004d40,color:#fff,stroke:#26a69a,stroke-width:1px
+
+    class UNIT outOfScope
+    class API,UI,PERF inScope
 ```
 
 **Why this pyramid is already backed by a genuinely real, documented result:** per
@@ -63,9 +69,17 @@ flowchart LR
     PR["Pull Request opened"] --> API["API suite<br/>(whitelisting, commercial slabs, consent checks)"]
     API --> UI["Playwright UI suite<br/>(Signup -> ... -> Transact)"]
     UI --> Gate{"All required checks pass?"}
-    Gate -->|Yes| Merge["Merge allowed"]
-    Gate -->|No| Block["Merge blocked — failure surfaced on the PR"]
-    Merge --> Nightly["Nightly: JMeter soak-test run<br/>(too slow/expensive for per-PR gating)"]
+    Gate -->|Yes| Merge["✅ Merge allowed"]
+    Gate -->|No| Block["❌ Merge blocked — failure surfaced on the PR"]
+    Merge --> Nightly["🌙 Nightly: JMeter soak-test run<br/>(too slow/expensive for per-PR gating)"]
+
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef bad fill:#b71c1c,color:#fff,stroke:#e53935,stroke-width:1px
+
+    class Gate gate
+    class Merge good
+    class Block bad
 ```
 
 ## 5. Performance Testing — Pointing at the Real Result, Not Repeating It
