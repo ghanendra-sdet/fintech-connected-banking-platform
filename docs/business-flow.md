@@ -4,7 +4,7 @@
 > onboarding/whitelisting state machine, this document covers the **actual end-to-end business
 > flow** — what a business experiences linking and using a bank account, including multi-account
 > behavior, consent, and how the real load test (see
-> [`test-reports/load-testing-report.md`](../load-testing-report.md)) maps onto
+> [`load-testing-report.md`](../load-testing-report.md)) maps onto
 > these flows.
 
 ## Actors
