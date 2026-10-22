@@ -4,14 +4,13 @@
 > Transaction views, Mini Statement, and Reports (see [`feature-modules.md`](./feature-modules.md)).
 > This document covers whether it's represented **consistently** across all of them.
 
-## Why This Matters More Here Than in Most Modules
+## The Single Highest-Risk Area for UI Confusion in This Product
 
 Connected Banking already has two genuinely different balances shown side by side — the **Bank
 Widget** (actual bank balance) and the **Ledger Widget** (platform wallet balance), per
-[`architecture-and-flow.md`](./architecture-and-flow.md). This is the single highest-risk area
-for UI confusion in the entire product: if these two widgets are not *clearly and consistently*
-distinguished everywhere they appear, merchants will misunderstand which balance they can
-actually transact against.
+[`architecture-and-flow.md`](./architecture-and-flow.md). If these two widgets are not *clearly
+and consistently* distinguished everywhere they appear, merchants will misunderstand which
+balance they can actually transact against.
 
 ## 1. Status Badge Consistency
 
