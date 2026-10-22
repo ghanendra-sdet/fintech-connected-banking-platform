@@ -83,7 +83,7 @@ rather than an application performance issue.
 | Total Test Duration | 1 hour 26 minutes |
 | Total Transactions Executed | 4,05,067 (4.05 Lakh) |
 | Average Throughput Achieved | 80.2 TPS |
-| Peak Throughput | 80 TPS sustained (100 TPS at peak) |
+| Peak Throughput | 100 TPS (briefly, before stabilizing to the 80.2 TPS average below) |
 | Error Rate | 0.001% |
 | Successful Transactions | ≈ 4,05,063 |
 | Failed Transactions | ≈ 4 |
