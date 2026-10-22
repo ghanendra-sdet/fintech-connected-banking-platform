@@ -7,8 +7,9 @@
 > service-level (microservice) view, see [`service-architecture.md`](./service-architecture.md).
 > See [`README.md`](./README.md) for the full documentation map.
 >
-> Every diagram below is drawn in [Mermaid](https://mermaid.js.org/), which GitHub renders
-> natively in-page — nothing here requires opening another site or tool to read it.
+> Every diagram below is drawn in <a href="https://mermaid.js.org/" target="_blank" rel="noopener noreferrer">Mermaid</a>,
+> which GitHub renders natively in-page — nothing here requires opening another site or tool to
+> read it.
 
 ## Full Onboarding-to-Transaction Flow
 
@@ -29,10 +30,17 @@ stateDiagram-v2
     SIGNED_UP --> EKYC_COMPLETE
     EKYC_COMPLETE --> ACCOUNT_ADDED
     ACCOUNT_ADDED --> WHITELIST_PENDING
-    WHITELIST_PENDING --> WHITELIST_ACTIVE
-    WHITELIST_PENDING --> WHITELIST_FAILED
+    WHITELIST_PENDING --> WHITELIST_ACTIVE: ✅
+    WHITELIST_PENDING --> WHITELIST_FAILED: ❌
     WHITELIST_ACTIVE --> TRANSACTING
     WHITELIST_FAILED --> [*]
+
+    classDef pending fill:#e65100,color:#fff
+    classDef good fill:#1b5e20,color:#fff
+    classDef bad fill:#b71c1c,color:#fff
+    class WHITELIST_PENDING pending
+    class WHITELIST_ACTIVE,TRANSACTING good
+    class WHITELIST_FAILED bad
 ```
 
 - **WHITELIST_PENDING** is the highest-risk state to test — it can persist for an unpredictable
@@ -41,22 +49,31 @@ stateDiagram-v2
   clear error, not silently queued or dropped — see the next section for exactly what happens
   when that block isn't enforced everywhere it needs to be
 
-## The Real Mechanism Behind Defect #1 — The Fourth Time This Portfolio Has Hit This Pattern
+## The Real Mechanism Behind Defect #1 — A UI-Only Check Is Not a Real Boundary
 
 [`sample-defect-report.md`](../sample-defect-report.md) Defect #1 (a transaction proceeding
-despite `WHITELIST_PENDING` status, when called via the API) is worth naming explicitly as a
-*recurring* pattern, not a one-off: this portfolio's HRMS repo (a disabled form field with no
-server-side equivalent), Reseller repo (a search endpoint missing tenant-ID scoping), and Payout
-Engine repo (an approval check enforced only in the UI) all hit the exact same shape of defect,
-in four completely different domains:
+despite `WHITELIST_PENDING` status, when called via the API) is a recurring defect *shape*, not
+a one-off: any time a state check is enforced only in the dashboard and never independently
+re-verified at the API/service layer, the check protects nothing for a client that never touches
+that dashboard. Here's exactly where this platform's version of it lives:
 
 ```mermaid
 flowchart TD
-    Request["POST /transactions, account status = WHITELIST_PENDING"] --> UILayer{"UI Layer:<br/>does the dashboard block initiation<br/>for a non-whitelisted account?"}
-    UILayer -->|Yes, correctly blocked in the UI| Trust["Trusted the UI alone — not a real boundary.<br/>API-integrating businesses (this product's PRIMARY users,<br/>per business-overview.md) never go through this UI at all."]
-    Trust --> APILayer{"API/Service Layer:<br/>does the transaction-initiation service\nindependently re-check whitelisting status?"}
-    APILayer -->|"Yes — status re-checked"| Blocked["Request REJECTED — clear 'Bank not yet whitelisted' error"]
-    APILayer -->|"No — request proceeds to the bank adapter\n(this IS Defect #1's actual root cause)"| Downstream["Fails downstream with a generic, unhelpful error —\nand unnecessarily loads the bank adapter layer\nwith a request that should never have been sent"]
+    Request["POST /transactions, account status = WHITELIST_PENDING"] --> UILayer{"🖥️ UI Layer:<br/>does the dashboard block initiation<br/>for a non-whitelisted account?"}
+    UILayer -->|Yes, correctly blocked in the UI| Trust["⚠️ Trusted the UI alone — not a real boundary.<br/>API-integrating businesses (this product's PRIMARY users,<br/>per business-overview.md) never go through this UI at all."]
+    Trust --> APILayer{"🔌 API/Service Layer:<br/>does the transaction-initiation service<br/>independently re-check whitelisting status?"}
+    APILayer -->|"Yes — status re-checked"| Blocked["✅ Request REJECTED — clear 'Bank not yet whitelisted' error"]
+    APILayer -->|"❌ No — request proceeds to the bank adapter<br/>(this IS Defect #1's actual root cause)"| Downstream["🚨 Fails downstream with a generic, unhelpful error —<br/>and unnecessarily loads the bank adapter layer<br/>with a request that should never have been sent"]
+
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef warn fill:#e65100,color:#fff,stroke:#fb8c00,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef bad fill:#b71c1c,color:#fff,stroke:#e53935,stroke-width:1px
+
+    class UILayer,APILayer gate
+    class Trust warn
+    class Blocked good
+    class Downstream bad
 ```
 
 **Why this specific product makes the defect *more* consequential than it would be elsewhere:**
@@ -74,13 +91,21 @@ This is the concrete admin-side sequence that must complete *before* a merchant 
 
 ```mermaid
 flowchart TD
-    A["Admin: Settings -> Connected Banking -><br/>confirm merchant appears in All Merchants list"] --> B["Admin: Check merchant status -<br/>Active / Inactive / Not Subscribed"]
+    A["🛡️ Admin: Settings -> Connected Banking -><br/>confirm merchant appears in All Merchants list"] --> B["Admin: Check merchant status -<br/>Active / Inactive / Not Subscribed"]
     B --> C["Admin: Activate merchant (first-time)<br/>via row action menu — status: yellow -> green"]
     C --> D["Admin: Open Merchant Profile -><br/>Service Management -> Connected Banking"]
     D --> E["Admin: Add Commercial -> select Channel -><br/>VA Number auto-assigned -> set Whitelisting toggle"]
-    E --> F["Admin: Create Bank Rule -> Bank, Account Number,<br/>IFSC Code, Daily Limit (all mandatory)"]
+    E --> F["⚠️ Admin: Create Bank Rule -> Bank, Account Number,<br/>IFSC Code, Daily Limit (all mandatory)"]
     F --> G["Admin: Add Commercial Rule -> Payment Mode(s) -><br/>Charge Type -> fee values -> min/max limits -> Submit"]
-    G --> H["Admin: Verify commercials created successfully -<br/>merchant can now proceed"]
+    G --> H["✅ Admin: Verify commercials created successfully -<br/>merchant can now proceed"]
+
+    classDef person fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:1px
+    classDef warn fill:#e65100,color:#fff,stroke:#fb8c00,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+
+    class A,B,C,D,G person
+    class E,F warn
+    class H good
 ```
 
 > ⚠️ The exact values entered in **Create Bank Rule** (Account Number, IFSC) must be re-entered
@@ -95,16 +120,26 @@ per the SOP's own "⚠️ critical" framing.
 
 ```mermaid
 flowchart TD
-    A["Merchant sees: 'Connected Banking isn't activated yet.<br/>Contact support.' — persists until Admin's flow completes"] --> B["'Connect Now' button appears<br/>only after Admin adds commercials"]
+    A["🧑 Merchant sees: 'Connected Banking isn't activated yet.<br/>Contact support.' — persists until Admin's flow completes"] --> B["'Connect Now' button appears<br/>only after Admin adds commercials"]
     B --> C{"Click Connect Now"}
-    C -->|"No, open a new account"| Ext["Redirected to the bank's own site<br/>(external, out of scope)"]
+    C -->|"No, open a new account"| Ext["🌐 Redirected to the bank's own site<br/>(external, out of scope)"]
     C -->|"Yes, I have an account"| D["Enter Account Number, Confirm Account Number, IFSC Code"]
-    D --> E{"Click Verify —<br/>MUST exactly match what Admin entered"}
-    E -->|Match| F["Shows verified details + Account Type<br/>(defaults 'Current Account')"]
-    E -->|Mismatch| Fail["Inline 'Account numbers do not match' error"]
+    D --> E{"⚠️ Click Verify —<br/>MUST exactly match what Admin entered"}
+    E -->|Match| F["✅ Shows verified details + Account Type<br/>(defaults 'Current Account')"]
+    E -->|Mismatch| Fail["❌ Inline 'Account numbers do not match' error"]
     F --> G["Click Continue -> Terms & Conditions page<br/>4 mandatory checkboxes"]
     G --> H["Click Submit -> confirmation screen,<br/>synced balance shown"]
-    H --> I["Click View Dashboard -> live Connected Banking Dashboard"]
+    H --> I["✅ Click View Dashboard -> live Connected Banking Dashboard"]
+
+    classDef person fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:1px
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef bad fill:#b71c1c,color:#fff,stroke:#e53935,stroke-width:1px
+
+    class A person
+    class C,E gate
+    class F,H,I good
+    class Fail bad
 ```
 
 **Testing implication:** the account-number/IFSC match check (merchant-entered vs. admin-entered)
@@ -132,13 +167,23 @@ correctly."
 
 ```mermaid
 flowchart TD
-    Start["Merchant initiates a Ledger top-up"] --> Check{"Account whitelisted?"}
-    Check -->|Yes| Instant["Funds added to wallet INSTANTLY"]
-    Check -->|No| Pending["Transaction enters PENDING state"]
+    Start["🧑 Merchant initiates a Ledger top-up"] --> Check{"Account whitelisted?"}
+    Check -->|Yes| Instant["✅ Funds added to wallet INSTANTLY"]
+    Check -->|No| Pending["⏳ Transaction enters PENDING state"]
     Pending --> Support["Merchant contacts Support"]
-    Support --> Review["Admin reviews the Pending IRN -><br/>three-dot action menu -> Status Update"]
-    Review -->|Approve| Credit["Funds credited to Ledger"]
-    Review -->|Cancel| Reject["Top-up rejected, merchant notified"]
+    Support --> Review["🛡️ Admin reviews the Pending IRN -><br/>three-dot action menu -> Status Update"]
+    Review -->|Approve| Credit["✅ Funds credited to Ledger"]
+    Review -->|Cancel| Reject["❌ Top-up rejected, merchant notified"]
+
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef warn fill:#e65100,color:#fff,stroke:#fb8c00,stroke-width:1px
+    classDef bad fill:#b71c1c,color:#fff,stroke:#e53935,stroke-width:1px
+
+    class Check,Review gate
+    class Instant,Credit good
+    class Pending warn
+    class Reject bad
 ```
 
 **Testing implication:** a Pending recharge must be a first-class, trackable state — it should
@@ -151,18 +196,20 @@ this guarantee failing — see the sequence below for the actual mechanism.
 
 ```mermaid
 sequenceDiagram
-    participant Business
+    participant Business as 🧑 Business
     participant ConsentSvc as Consent Management Service
-    participant Cache as Access-Check Cache
+    participant Cache as ⚠️ Access-Check Cache
     participant TxnAPI as Transaction Query API
 
     Business->>ConsentSvc: Revokes consent for Account X
     ConsentSvc->>ConsentSvc: Consent status updated to REVOKED (authoritative)
+    rect rgb(183, 28, 28)
     Note over Cache: Cache still holds the OLD "ACTIVE" value —<br/>only refreshed on its own background cycle<br/>(this IS Defect #4's actual root cause)
     Business->>TxnAPI: Queries transactions for Account X (seconds later)
     TxnAPI->>Cache: Checks cached consent status
     Cache-->>TxnAPI: "ACTIVE" — WRONG, stale
     TxnAPI-->>Business: Data returned — a real ~90-second unauthorized-access window
+    end
 ```
 
 **Why "eventually consistent" is the wrong model for a security boundary specifically:** a
@@ -172,19 +219,28 @@ of staleness is harmless. Consent is not that kind of data — per
 soft preference," and the fix is exactly what that distinction implies: either invalidate the
 cache synchronously on revocation, or skip the cache entirely for this specific check and query
 consent status directly. The ~90-second window in this defect is the gap between "the system of
-record changed" and "every reader of that data found out" — the same category of problem as this
-portfolio's YOBO repo (an in-flight data fetch outliving a revocation), here caused by caching
-instead of request timing, but with the identical lesson: a security-relevant revocation has to
+record changed" and "every reader of that data found out" — caused here by caching rather than
+by request timing, but the lesson is the same either way: a security-relevant revocation has to
 propagate before anything is allowed to act as if it hadn't happened.
 
 ## Fee Wallet Flow (Fee Deduction on Transactions)
 
 ```mermaid
 flowchart TD
-    Cust["Customer's Own Bank Account<br/>funds never touched by the platform for fees"] --> Txn["Transaction Processed"]
-    Txn --> Check{"Fee Wallet has sufficient balance?"}
-    Check -->|Yes| Deduct["Fee + GST deducted from wallet"]
-    Check -->|No| Block["Transaction blocked BEFORE processing"]
+    Cust["🏦 Customer's Own Bank Account<br/>funds never touched by the platform for fees"] --> Txn["💳 Transaction Processed"]
+    Txn --> Check{"👛 Fee Wallet has sufficient balance?"}
+    Check -->|Yes| Deduct["✅ Fee + GST deducted from wallet"]
+    Check -->|No| Block["❌ Transaction blocked BEFORE processing"]
+
+    classDef service fill:#004d40,color:#fff,stroke:#26a69a,stroke-width:1px
+    classDef gate fill:#4a148c,color:#fff,stroke:#ab47bc,stroke-width:1px
+    classDef good fill:#1b5e20,color:#fff,stroke:#43a047,stroke-width:1px
+    classDef bad fill:#b71c1c,color:#fff,stroke:#e53935,stroke-width:1px
+
+    class Cust,Txn service
+    class Check gate
+    class Deduct good
+    class Block bad
 ```
 
 **Testing implication:** the fee check and the transaction itself are two separate systems of
@@ -209,10 +265,16 @@ same (wrong, for one of them) slab.
 
 ```mermaid
 flowchart TD
-    Business([Business — self-serve onboarding]) --> CBP["Connected Banking Platform<br/>(API + UI)"]
-    CBP --> Bank["Bank<br/>via DSP-whitelisted API"]
+    Business(["🧑 Business — self-serve onboarding"]) --> CBP["Connected Banking Platform<br/>(API + UI)"]
+    CBP --> Bank["🏦 Bank<br/>via DSP-whitelisted API"]
     CBP --> CommE["Commercial / Fee Engine"]
-    CommE --> Wallet["Fee Wallet"]
+    CommE --> Wallet["👛 Fee Wallet"]
+
+    classDef person fill:#1a237e,color:#fff,stroke:#5c6bc0,stroke-width:1px
+    classDef service fill:#004d40,color:#fff,stroke:#26a69a,stroke-width:1px
+
+    class Business person
+    class CBP,Bank,CommE,Wallet service
 ```
 
 ---
